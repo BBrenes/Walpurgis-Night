@@ -1,0 +1,14 @@
+body {
+    padding: 0;
+    text-align: center;
+ }
+
+#game-board {
+    margin: 0px auto;
+    padding: 0;
+    /*border: 1px solid red;*/
+}
+
+canvas{
+    border: 1px solid purple;
+}
