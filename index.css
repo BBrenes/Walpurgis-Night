@@ -1,14 +1,16 @@
 body {
     padding: 0;
     text-align: center;
+    background-color: rgb(0, 0, 0);
  }
 
 #game-board {
-    margin: 0px auto;
+    margin: auto auto;
     padding: 0;
     /*border: 1px solid red;*/
 }
 
 canvas{
+    margin: auto auto;
     border: 1px solid purple;
 }
