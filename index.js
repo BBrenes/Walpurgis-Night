@@ -20,12 +20,36 @@ const welcomeImg = new Image()
 welcomeImg.src = "./images/welcome.png"
 const zeroImg = new Image()
 zeroImg.src = "./images/zero.png"
+const arrowsImg = new Image()
+arrowsImg.src = "./images/arrows.png"
+const keyImg = new Image()
+keyImg.src = "./images/key.png"
+const carnivalImg = new Image()
+carnivalImg.src = "./images/carnival.png"
+const fiveImg = new Image()
+fiveImg.src = "./images/five.png"
+const fourImg = new Image()
+fourImg.src = "./images/four.png"
+const threeImg = new Image()
+threeImg.src = "./images/three.png"
+const twoImg = new Image()
+twoImg.src = "./images/two.png"
+const oneImg = new Image()
+oneImg.src = "./images/one.png"
+const openShieldImg = new Image()
+openShieldImg.src = "./images/open-shield.png"
+const closeShieldImg = new Image()
+closeShieldImg.src = "./images/close-shield.png"
+const bgmagentaImg = new Image()
+bgmagentaImg.src = "./images/backgroundmagenta.png"
+
+
 
 // GAME STATE
 const state = {
     current : 0, // CURRENT STATE
     welcome : 0, // GAME WELCOME SCREEN
-    instruccions: 1, // GAME INSTRUCTIONS
+    gameplay: 1, // GAME INSTRUCTIONS
     intro: 2, //INTRO FRAMES
     game : 3, // GAME LOOP
     overWin : 4, // END OF GAME
@@ -35,8 +59,13 @@ const state = {
 //BACKGROUND
 const backgroundImage = {
     img: backgroundImg,
+    imgmagenta: bgmagentaImg,
     draw: function(){
-        ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height)
+        if(barMagic.magicActive == false){
+            ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height)
+        } else{
+            ctx.drawImage(this.imgmagenta, 0, 0, canvas.width, canvas.height)
+        }
     }
 }
 
@@ -76,6 +105,8 @@ class Component {
         this.speedX = 0;
         this.speedY = 0;
         this.yRandom = canvas.height/2 - 125;
+        this.canShoot = true
+        this.counterShoot = 20
     }
     left() {
         return this.x;
@@ -138,16 +169,17 @@ class Component {
         }
     }
     moveWalpurgis(){
-        if (myGameArea.frames % 100 === 0 && myGameArea.frames > 0) {
-            this.yRandom = Math.floor(Math.random() * (canvas.height - this.height - 20) + 10)
+        if(barMagic.magicActive == false){
+            if (myGameArea.frames % 100 === 0 && myGameArea.frames > 0) {
+                this.yRandom = Math.floor(Math.random() * (canvas.height - this.height - 20) + 10)
+            }
+            if(this.y < this.yRandom){
+                this.y += 1
+            } else if(this.y > this.yRandom){
+                this.y -= 1
+            } else{
+            }
         }
-        if(this.y < this.yRandom){
-            this.y += 1
-        } else if(this.y > this.yRandom){
-            this.y -= 1
-        } else{
-        }
-
     }
 
 }
@@ -162,8 +194,37 @@ class Bar {
         this.multiplier = multiplier;
         this.color = color;
         this.life = life;
+        this.counterMagic = 0
+        this.magicActive = false
     }
     updateHomuraBar() {  // GENERATES HOMURA BAR
+        ctx.fillStyle = 'white';
+        ctx.fillRect(this.x, this.y, this.width, this.height)
+        if(this.life <= 50 && this.life >= 25){
+            this.color = 'yellow'
+        }
+        if(this.life < 25 && this.life >= 0){
+            this.color = 'red'
+        }
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x + 2, this.y + 2, this.life * this.multiplier, this.height -4)
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.x + 2 + this.life * this.multiplier, this.y + 2, (100 - this.life) * this.multiplier, this.height -4)
+    }
+    updateMagicBar() {  // GENERATES MAGIC BAR
+        this.counterMagic += 1
+        if(this.magicActive == false){
+            if(this.counterMagic % 6 === 0 && this.life < 100){
+                this.life += 1
+            }
+        }else {
+            if(this.life <= 0){
+                this.magicActive = false
+                closeShield.shieldMoving = true //APPEAR CLOSED SHIELD
+            }else if(this.counterMagic % 6 === 0 && this.life > 0){
+                this.life -= 1
+            }
+        }
         ctx.fillStyle = 'white';
         ctx.fillRect(this.x, this.y, this.width, this.height)
         ctx.fillStyle = this.color;
@@ -174,6 +235,12 @@ class Bar {
     updateWalpurgisBar() {  // GENERATES WALPURGIS BAR
         ctx.fillStyle = 'white';
         ctx.fillRect(this.x, this.y, this.width, this.height)
+        if(this.life <= 50 && this.life >= 25){
+            this.color = 'yellow'
+        }
+        if(this.life < 25 && this.life >= 0){
+            this.color = 'red'
+        }
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x + 2 + (100 - this.life) * this.multiplier, this.y + 2, this.life * this.multiplier, this.height -4)
         ctx.fillStyle = 'black';
@@ -181,13 +248,50 @@ class Bar {
     }
 }
 
+//SHIELDS
+class Shield {
+    constructor(x, y, width, height, image) {
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+        this.image = image;
+        this.counterShield = 0;
+        this.shieldMoving = false
+    }
+    updateShield() {  // GENERATES SHIELD
+        if(this.shieldMoving == true){
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+        }
+    }
+    moveShield(){
+        if(this.shieldMoving == true){
+            this.counterShield +=1
+            if (this.counterShield % 1 === 0 && this.counterShield <= 10) {
+                this.y += 40
+            } else if(this.counterShield % 1 === 0 && this.counterShield > 10 && this.counterShield <= 40){
+                this.y += 0
+            } else if(this.counterShield % 1 === 0 && this.counterShield > 40 && this.counterShield <= 50){
+                this.y += 40
+            }else if(this.counterShield % 1 === 0 && this.counterShield > 50){
+                this.y = -300;
+                this.counterShield = 0;
+                this.shieldMoving = false
+            }
+        }
+    }
+}
 
+//FIRST DECLARATION OF OBJECTS
     let homura = new Component(10, canvas.height/2 - 100, 166, 190)
     let walpurgis = new Component(canvas.width - 239 -10, canvas.height/2 - 125, 239, 250)
     let allFamiliars = []
     let allMissiles = []
     let barHomura = new Bar(15, 15, 304, 20, 3, '#49DE2B', 100)
     let barWalpurgis = new Bar(canvas.width -604 -15 , 15, 604, 20, 6, '#49DE2B', 100)
+    let barMagic = new Bar(15 , 45, 204, 20, 2, '#D920DB', 0)
+    let openShield = new Shield(canvas.width/2 - 250, -300, 500, 500, openShieldImg)
+    let closeShield = new Shield(canvas.width/2 - 250, -300, 500, 500, closeShieldImg)
 
 // RESET OBJECTS FOR NEW GAME
 function resetGame(){
@@ -197,6 +301,7 @@ function resetGame(){
     allMissiles = []
     barHomura = new Bar(15, 15, 304, 20, 3, '#49DE2B', 100)
     barWalpurgis = new Bar(canvas.width -604 -15 , 15, 604, 20, 6, '#49DE2B', 100)
+    barMagic = new Bar(15 , 45, 204, 20, 2, '#D920DB', 0)
     myGameArea.frames = 0
     myGameArea.minute = 0
     myGameArea.second = 0
@@ -204,15 +309,16 @@ function resetGame(){
     myGameArea.secondAux = "00"
 }
 
-
 // FAMILIARS UPDATE
 function updateFamiliars() {
     for (let i = 0; i < allFamiliars.length; i++) {
-        allFamiliars[i].x -= 2
+        if(barMagic.magicActive == false){
+            allFamiliars[i].x -= 2
+        }
         allFamiliars[i].updateFamiliar();
     }
     myGameArea.frames += 1
-    if (myGameArea.frames % 70 === 0) {
+    if (myGameArea.frames % 70 === 0 && barMagic.magicActive == false) {
         let widthFamiliar = 70
         let heightFamiliar = 100
         let yRandom = Math.floor(Math.random() * 510 + 50);
@@ -224,11 +330,15 @@ function updateFamiliars() {
 function createMissile() {
     let widthMissile = 50
     let heightMissile = 20
+    if(homura.counterShoot >= 20){
     // PUSH MISSILE
     allMissiles.push(new Component(homura.x + 140, homura.y + 17, widthMissile, heightMissile));
+    homura.counterShoot = 0;
+    }
 }
 
 function updateMissiles() {
+    homura.counterShoot += 1
     for (let i = 0; i < allMissiles.length; i++) {
         allMissiles[i].x += 5
         allMissiles[i].updateMissile()
@@ -240,7 +350,7 @@ function checkCrashedHomura() {
     for (let i = 0; i < allFamiliars.length; i++) {
         if(homura.crashWithHomura(allFamiliars[i]) === true){
             allFamiliars.splice(i,1)
-            barHomura.life -= 100  //Poner a 3
+            barHomura.life -= 20  //Poner a 3
             break
         }
     }
@@ -251,7 +361,7 @@ function checkCrashedWalpurgis() {
     for (let i = 0; i < allMissiles.length; i++) {
         if(walpurgis.crashWith(allMissiles[i]) === true){
             allMissiles.splice(i,1)
-            barWalpurgis.life -= 100 //Poner a 1
+            barWalpurgis.life -= 20 //Poner a 1
             break
         }
     }
@@ -272,15 +382,6 @@ function checkCrashedFamiliars() {
 
 // GAME OVER
 function checkGameOver(id) {
-    /*
-    const crashed = allFamiliars.some(function (familiar) {
-      return homura.crashWithHomura(familiar); // RETURN TRUE OR FALSE
-    })
-    if (crashed) {
-        cancelAnimationFrame(id)
-        console.log("Game Over")
-    }
-    */
    if(barHomura.life <= 0){
         cancelAnimationFrame(id)
         state.current = 4
@@ -329,6 +430,11 @@ function updateGameArea() {
     checkCrashedFamiliars()
     barHomura.updateHomuraBar()
     barWalpurgis.updateWalpurgisBar()
+    barMagic.updateMagicBar()
+    openShield.moveShield()
+    openShield.updateShield()
+    closeShield.moveShield()
+    closeShield.updateShield()
     myGameArea.addSecond()
     myGameArea.updateChronometer()
     let frameId = requestAnimationFrame(updateGameArea)
@@ -337,6 +443,11 @@ function updateGameArea() {
 
 //GAME'S INVOKE
 window.onload = () =>{
+    welcome()
+}
+
+//WELCOME GAME
+function welcome(){
     ctx.drawImage(welcomeImg, 0, 0, canvas.width, canvas.height)
     ctx.font = '120px "Kaushan Script"';
     ctx.fillStyle = '#F0F0F0';
@@ -347,15 +458,39 @@ window.onload = () =>{
     ctx.fillText(`How to play`, canvas.width/2 - 94, 420);
 }
 
-/* 
-window.onload = () => {
-    updateGameArea()
-}
-*/
-
 //GAMEPLAY
 function gameplay(){
-    
+    ctx.drawImage(welcomeImg, 0, 0, canvas.width, canvas.height)
+    ctx.font = '35px "Kaushan Script"';
+    ctx.fillStyle = '#F0F0F0';
+    ctx.fillText(`Walpurgis Night has arrived to destroy everything in its path.`, canvas.width/2 - 430, 150);
+    ctx.fillText(`Defeat Walpurgis so Madoka does not have to turn into a magical girl.`, canvas.width/2 - 485, 220);
+    ctx.fillText(`Use           to move and press        to shoot missiles.`, canvas.width/2 - 366, 290);
+    ctx.drawImage(arrowsImg, 400, 248, 62, 46)
+    ctx.drawImage(keyImg, canvas.width/2 + 38, 258, 40, 40)
+    ctx.font = '22px arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText(`A`, canvas.width/2 + 51, 282);
+    ctx.drawImage(buttonImg, canvas.width/2 - 120, 348, 240, 130)
+    ctx.font = '39px "Kaushan Script"';
+    ctx.fillStyle = '#F0F0F0';
+    ctx.fillText(`Start`, canvas.width/2 - 50, 420);
+}
+
+//INTRO GAME
+function intro(){
+    ctx.drawImage(carnivalImg, 0, 0, canvas.width, canvas.height)
+    setTimeout(function(){ ctx.drawImage(fiveImg, 0, 0, canvas.width, canvas.height) }, 1000);
+    setTimeout(function(){ ctx.drawImage(fourImg, 0, 0, canvas.width, canvas.height) }, 2000);
+    setTimeout(function(){ ctx.drawImage(threeImg, 0, 0, canvas.width, canvas.height) }, 3000);
+    setTimeout(function(){ ctx.drawImage(twoImg, 0, 0, canvas.width, canvas.height) }, 4000);
+    setTimeout(function(){ ctx.drawImage(oneImg, 0, 0, canvas.width, canvas.height) }, 5000);
+    setTimeout(function(){ ctx.drawImage(zeroImg, 0, 0, canvas.width, canvas.height) }, 6000);
+    setTimeout(function(){ 
+        state.current = state.game
+        resetGame()
+        updateGameArea()
+    }, 7000);
 }
 
 // EVENTS
@@ -375,6 +510,12 @@ document.addEventListener('keydown', (e) => {
         break;
         case 65: // letter A
             createMissile()
+        break;
+        case 83: // letter S
+            if(barMagic.magicActive == false && barMagic.life >= 100){
+                barMagic.magicActive = true
+                openShield.shieldMoving = true
+            }
         break;
     }
   })
@@ -410,27 +551,32 @@ document.addEventListener("click", function(evt){ // CLICK EVENT BY STATE
         case state.welcome: // CHECK IF BUTTON WAS CLICKED
             //IF BUTTON WAS CLICKED
             if(clickX >= btnWelcome.x && clickX <= btnWelcome.x + btnWelcome.w && clickY >= btnWelcome.y && clickY <= btnWelcome.y + btnWelcome.h){
-                state.current = state.game;
-                resetGame();
-                updateGameArea();
+                state.current = state.gameplay;
+                gameplay()
+                console.log('button clicked')
+            }
+        break;
+        case state.gameplay: // CHECK IF BUTTON WAS CLICKED
+            //IF BUTTON WAS CLICKED
+            if(clickX >= btnWelcome.x && clickX <= btnWelcome.x + btnWelcome.w && clickY >= btnWelcome.y && clickY <= btnWelcome.y + btnWelcome.h){
+                state.current = state.intro;
+                intro()
                 console.log('button clicked')
             }
         break;
         case state.overWin: // CHECK IF BUTTON WAS CLICKED
             //IF BUTTON WAS CLICKED
             if(clickX >= btnWin.x && clickX <= btnWin.x + btnWin.w && clickY >= btnWin.y && clickY <= btnWin.y + btnWin.h){
-                state.current = state.game;
-                resetGame();
-                updateGameArea();
+                state.current = state.welcome;
+                welcome()
                 console.log('button clicked')
             }
         break;
         case state.overLose: // CHECK IF BUTTON WAS CLICKED
             //IF BUTTON WAS CLICKED
             if(clickX >= btnLose.x && clickX <= btnLose.x + btnLose.w && clickY >= btnLose.y && clickY <= btnLose.y + btnLose.h){
-                state.current = state.game;
-                resetGame();
-                updateGameArea();
+                state.current = state.welcome;
+                welcome()
                 console.log('button clicked')
             }
         break;
