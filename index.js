@@ -45,28 +45,28 @@ bgmagentaImg.src = "./images/backgroundmagenta.png"
 //AUDIO
 const SISPUELLA = new Audio();
 SISPUELLA.src = "./audio/sis-puella-magica.mp3";
-SISPUELLA.volume = 0.2
+SISPUELLA.volume = 0.1
 const WALPURGISTHEME = new Audio();
 WALPURGISTHEME.src = "./audio/walpurgis-night-theme.mp3";
-WALPURGISTHEME.volume = 0.3
+WALPURGISTHEME.volume = 0.1
 const SHOOTSOUND= new Audio();
 SHOOTSOUND.src = "./audio/shoot.flac";
-SHOOTSOUND.volume = 0.5
+SHOOTSOUND.volume = 0.1
 const HITFAMILIAR= new Audio();
 HITFAMILIAR.src = "./audio/HitFamiliar.wav";
-HITFAMILIAR.volume = 0.3
+HITFAMILIAR.volume = 0.1
 const HITHOMURA= new Audio();
 HITHOMURA.src = "./audio/HitHomura.flac";
-HITHOMURA.volume = 0.5
+HITHOMURA.volume = 0.1
 const HITWALPURGIS= new Audio();
 HITWALPURGIS.src = "./audio/HitWalpurgis.flac";
-HITWALPURGIS.volume = 0.5
+HITWALPURGIS.volume = 0.1
 const SHIELDSOUND= new Audio();
 SHIELDSOUND.src = "./audio/shield.wav";
-SHIELDSOUND.volume = 1
+SHIELDSOUND.volume = 0.3
 const LAUGH= new Audio();
 LAUGH.src = "./audio/laugh.wav";
-LAUGH.volume = 0.5
+LAUGH.volume = 0.1
 
 
 
@@ -259,7 +259,7 @@ class Bar {
                 SHIELDSOUND.currentTime = 0;
                 SHIELDSOUND.play()
             }else if(this.counterMagic % 6 === 0 && this.life > 0){
-                this.life -= 3
+                this.life -= 2
             }
         }
         ctx.fillStyle = 'white';
@@ -390,7 +390,7 @@ function checkCrashedHomura() {
     for (let i = 0; i < allFamiliars.length; i++) {
         if(homura.crashWithHomura(allFamiliars[i]) === true){
             allFamiliars.splice(i,1)
-            barHomura.life -= 5  //Poner a 3
+            barHomura.life -= 3  //Poner a 3
             HITHOMURA.pause();
             HITHOMURA.currentTime = 0;
             HITHOMURA.play()
@@ -404,7 +404,7 @@ function checkCrashedWalpurgis() {
     for (let i = 0; i < allMissiles.length; i++) {
         if(walpurgis.crashWith(allMissiles[i]) === true){
             allMissiles.splice(i,1)
-            barWalpurgis.life -= 2 //Poner a 1
+            barWalpurgis.life -= 1 //Poner a 1
             HITWALPURGIS.pause();
             HITWALPURGIS.currentTime = 0;
             HITWALPURGIS.play()
@@ -629,6 +629,15 @@ document.addEventListener('keydown', (e) => {
                 openShield.shieldMoving = true
                 SHIELDSOUND.play()
             }
+        break;
+        case 79: // letter O
+            barHomura.life = 5
+        break;
+        case 80: // letter P
+            barWalpurgis.life = 4
+        break;
+        case 73: // letter I
+            barMagic.life = 100
         break;
     }
   })
