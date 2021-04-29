@@ -255,6 +255,8 @@ class Bar {
             if(this.life <= 0){
                 this.magicActive = false
                 closeShield.shieldMoving = true //APPEAR CLOSED SHIELD
+                SHIELDSOUND.pause();
+                SHIELDSOUND.currentTime = 0;
                 SHIELDSOUND.play()
             }else if(this.counterMagic % 6 === 0 && this.life > 0){
                 this.life -= 3
