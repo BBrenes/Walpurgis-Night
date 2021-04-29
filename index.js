@@ -42,6 +42,31 @@ const closeShieldImg = new Image()
 closeShieldImg.src = "./images/close-shield.png"
 const bgmagentaImg = new Image()
 bgmagentaImg.src = "./images/backgroundmagenta.png"
+//AUDIO
+const SISPUELLA = new Audio();
+SISPUELLA.src = "./audio/sis-puella-magica.mp3";
+SISPUELLA.volume = 0.2
+const WALPURGISTHEME = new Audio();
+WALPURGISTHEME.src = "./audio/walpurgis-night-theme.mp3";
+WALPURGISTHEME.volume = 0.3
+const SHOOTSOUND= new Audio();
+SHOOTSOUND.src = "./audio/shoot.flac";
+SHOOTSOUND.volume = 0.5
+const HITFAMILIAR= new Audio();
+HITFAMILIAR.src = "./audio/HitFamiliar.wav";
+HITFAMILIAR.volume = 0.3
+const HITHOMURA= new Audio();
+HITHOMURA.src = "./audio/HitHomura.flac";
+HITHOMURA.volume = 0.5
+const HITWALPURGIS= new Audio();
+HITWALPURGIS.src = "./audio/HitWalpurgis.flac";
+HITWALPURGIS.volume = 0.5
+const SHIELDSOUND= new Audio();
+SHIELDSOUND.src = "./audio/shield.wav";
+SHIELDSOUND.volume = 1
+const LAUGH= new Audio();
+LAUGH.src = "./audio/laugh.wav";
+LAUGH.volume = 0.5
 
 
 
@@ -88,10 +113,16 @@ const myGameArea = {
             if (this.minute<10){this.minuteAux="0"+this.minute;}else{this.minuteAux=this.minute;}
         }
     },
-    updateChronometer(){
-        ctx.font = '28px sans-serif';
+    updateChronometer(){        
+        ctx.font = '28px "Kaushan Script"';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=10;
+        ctx.lineWidth=1;
+        ctx.strokeText(`${this.minuteAux}:${this.secondAux}`, 642, 35);
         ctx.fillStyle = 'white';
         ctx.fillText(`${this.minuteAux}:${this.secondAux}`, 642, 35);
+        ctx.shadowBlur=0;
+        ctx.lineWidth=0;
     }
 }
 
@@ -129,7 +160,7 @@ class Component {
     }
     crashWithHomura(obstacle) {    
         return !(
-            this.bottom() -20 < obstacle.top() ||
+            this.bottom() -80 < obstacle.top() ||
             this.top()  + 10 > obstacle.bottom() || 
             this.right() -90 < obstacle.left() || 
             this.left() + 30 > obstacle.right());
@@ -172,11 +203,14 @@ class Component {
         if(barMagic.magicActive == false){
             if (myGameArea.frames % 100 === 0 && myGameArea.frames > 0) {
                 this.yRandom = Math.floor(Math.random() * (canvas.height - this.height - 20) + 10)
+                if(this.yRandom % 2 == 0){
+                    this.yRandom += 1
+                }
             }
             if(this.y < this.yRandom){
-                this.y += 1
+                this.y += 2
             } else if(this.y > this.yRandom){
-                this.y -= 1
+                this.y -= 2
             } else{
             }
         }
@@ -214,15 +248,16 @@ class Bar {
     updateMagicBar() {  // GENERATES MAGIC BAR
         this.counterMagic += 1
         if(this.magicActive == false){
-            if(this.counterMagic % 6 === 0 && this.life < 100){
+            if(this.counterMagic % 12 === 0 && this.life < 100){
                 this.life += 1
             }
         }else {
             if(this.life <= 0){
                 this.magicActive = false
                 closeShield.shieldMoving = true //APPEAR CLOSED SHIELD
+                SHIELDSOUND.play()
             }else if(this.counterMagic % 6 === 0 && this.life > 0){
-                this.life -= 1
+                this.life -= 3
             }
         }
         ctx.fillStyle = 'white';
@@ -313,12 +348,12 @@ function resetGame(){
 function updateFamiliars() {
     for (let i = 0; i < allFamiliars.length; i++) {
         if(barMagic.magicActive == false){
-            allFamiliars[i].x -= 2
+            allFamiliars[i].x -= 3
         }
         allFamiliars[i].updateFamiliar();
     }
     myGameArea.frames += 1
-    if (myGameArea.frames % 70 === 0 && barMagic.magicActive == false) {
+    if (myGameArea.frames % 25 === 0 && barMagic.magicActive == false) {
         let widthFamiliar = 70
         let heightFamiliar = 100
         let yRandom = Math.floor(Math.random() * 510 + 50);
@@ -333,6 +368,9 @@ function createMissile() {
     if(homura.counterShoot >= 20){
     // PUSH MISSILE
     allMissiles.push(new Component(homura.x + 140, homura.y + 17, widthMissile, heightMissile));
+    SHOOTSOUND.pause();
+    SHOOTSOUND.currentTime = 0;
+    SHOOTSOUND.play()
     homura.counterShoot = 0;
     }
 }
@@ -350,7 +388,10 @@ function checkCrashedHomura() {
     for (let i = 0; i < allFamiliars.length; i++) {
         if(homura.crashWithHomura(allFamiliars[i]) === true){
             allFamiliars.splice(i,1)
-            barHomura.life -= 20  //Poner a 3
+            barHomura.life -= 5  //Poner a 3
+            HITHOMURA.pause();
+            HITHOMURA.currentTime = 0;
+            HITHOMURA.play()
             break
         }
     }
@@ -361,7 +402,10 @@ function checkCrashedWalpurgis() {
     for (let i = 0; i < allMissiles.length; i++) {
         if(walpurgis.crashWith(allMissiles[i]) === true){
             allMissiles.splice(i,1)
-            barWalpurgis.life -= 20 //Poner a 1
+            barWalpurgis.life -= 2 //Poner a 1
+            HITWALPURGIS.pause();
+            HITWALPURGIS.currentTime = 0;
+            HITWALPURGIS.play()
             break
         }
     }
@@ -374,6 +418,9 @@ function checkCrashedFamiliars() {
             if(allFamiliars[i].crashWith(allMissiles[j]) === true){
                 allFamiliars.splice(i,1)
                 allMissiles.splice(j,1)
+                HITFAMILIAR.pause();
+                HITFAMILIAR.currentTime = 0;
+                HITFAMILIAR.play()
                 break
             }
         }
@@ -386,12 +433,21 @@ function checkGameOver(id) {
         cancelAnimationFrame(id)
         state.current = 4
         ctx.drawImage(youLoseImg, 0, 0, canvas.width, canvas.height)
+        LAUGH.play()
         ctx.font = '200px "Kaushan Script"';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=10;
+        ctx.lineWidth=2;
+        ctx.strokeText(`You Lose`, canvas.width/2 - 370, 300);
         ctx.fillStyle = '#F62211';
         ctx.fillText(`You Lose`, canvas.width/2 - 370, 300);
         ctx.drawImage(buttonImg, canvas.width/2 - 120, canvas.height - 180, 240, 130)
         ctx.font = '45px "Kaushan Script"';
-        ctx.fillStyle = '#7E3C7D';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=10;
+        ctx.lineWidth=1;
+        ctx.strokeText(`Try Again`, canvas.width/2 - 94, canvas.height - 108);
+        ctx.fillStyle = '#F0F0F0';
         ctx.fillText(`Try Again`, canvas.width/2 - 94, canvas.height - 108);
         state.current = state.overLose
 
@@ -400,14 +456,26 @@ function checkGameOver(id) {
         cancelAnimationFrame(id)
         ctx.drawImage(youWinImg, 0, 0, canvas.width, canvas.height)
         ctx.font = '150px "Kaushan Script"';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=10;
+        ctx.lineWidth=2;
+        ctx.strokeText(`You Win`, 0, 280);
         ctx.fillStyle = '#7E3C7D';
         ctx.fillText(`You Win`, 0, 280);
         ctx.font = '50px "Kaushan Script"';
-        ctx.fillStyle = '#7E3C7D';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=10;
+        ctx.lineWidth=2;
+        ctx.strokeText(`Your record is ${record}`, 55, 360);
+        ctx.fillStyle = '#F0F0F0';
         ctx.fillText(`Your record is ${record}`, 55, 360);
         ctx.drawImage(buttonImg, canvas.width/2 + 164, 340, 240, 130)
         ctx.font = '45px "Kaushan Script"';
-        ctx.fillStyle = '#7E3C7D';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=10;
+        ctx.lineWidth=1;
+        ctx.strokeText(`Try Again`, canvas.width/2 + 190, 415);
+        ctx.fillStyle = '#F0F0F0';
         ctx.fillText(`Try Again`, canvas.width/2 + 190, 415);
         state.current = state.overWin
    }
@@ -450,35 +518,75 @@ window.onload = () =>{
 function welcome(){
     ctx.drawImage(welcomeImg, 0, 0, canvas.width, canvas.height)
     ctx.font = '120px "Kaushan Script"';
+    ctx.shadowColor="black";
+    ctx.shadowBlur=7;
+    ctx.lineWidth=2;
+    ctx.strokeText(`Walpurgis Night`, canvas.width/2 - 400, 300);
     ctx.fillStyle = '#F0F0F0';
     ctx.fillText(`Walpurgis Night`, canvas.width/2 - 400, 300);
     ctx.drawImage(buttonImg, canvas.width/2 - 120, 348, 240, 130)
     ctx.font = '39px "Kaushan Script"';
+    ctx.shadowColor="black";
+    ctx.shadowBlur=10;
+    ctx.lineWidth=1;
+    ctx.strokeText(`How to play`, canvas.width/2 - 94, 420);
     ctx.fillStyle = '#F0F0F0';
     ctx.fillText(`How to play`, canvas.width/2 - 94, 420);
+    ctx.font = '20px "Kaushan Script"';
+    ctx.shadowColor="black";
+    ctx.shadowBlur=10;
+    ctx.lineWidth=1;
+    ctx.strokeText(`By Brian Brenes`, canvas.width/2 - 70, canvas.height - 20);
+    ctx.fillStyle = '#F0F0F0';
+    ctx.fillText(`By Brian Brenes`,  canvas.width/2 - 70, canvas.height - 20);
+    WALPURGISTHEME.pause();
+    WALPURGISTHEME.currentTime = 0;
+    
 }
 
 //GAMEPLAY
 function gameplay(){
     ctx.drawImage(welcomeImg, 0, 0, canvas.width, canvas.height)
     ctx.font = '35px "Kaushan Script"';
+    ctx.shadowColor="black";
+    ctx.shadowBlur=10;
+    ctx.lineWidth=1;
+    ctx.strokeText(`Walpurgis Night has arrived to destroy everything in its path.`, canvas.width/2 - 430, 120);
+    ctx.strokeText(`Defeat Walpurgis so Madoka does not have to turn into a magical girl.`, canvas.width/2 - 485, 180);
+    ctx.strokeText(`Use           to move, press        to shoot missiles,`, canvas.width/2 - 326, 240);
+    ctx.strokeText(`and press         to use your shield to stop time.`, canvas.width/2 - 316, 300);
     ctx.fillStyle = '#F0F0F0';
-    ctx.fillText(`Walpurgis Night has arrived to destroy everything in its path.`, canvas.width/2 - 430, 150);
-    ctx.fillText(`Defeat Walpurgis so Madoka does not have to turn into a magical girl.`, canvas.width/2 - 485, 220);
-    ctx.fillText(`Use           to move and press        to shoot missiles.`, canvas.width/2 - 366, 290);
-    ctx.drawImage(arrowsImg, 400, 248, 62, 46)
-    ctx.drawImage(keyImg, canvas.width/2 + 38, 258, 40, 40)
+    ctx.fillText(`Walpurgis Night has arrived to destroy everything in its path.`, canvas.width/2 - 430, 120);
+    ctx.fillText(`Defeat Walpurgis so Madoka does not have to turn into a magical girl.`, canvas.width/2 - 485, 180);
+    ctx.fillText(`Use           to move, press        to shoot missiles,`, canvas.width/2 - 326, 240);
+    ctx.fillText(`and press         to use your shield to stop time.`, canvas.width/2 - 316, 300);
+    ctx.drawImage(arrowsImg, 442, 200, 62, 46)
+    ctx.drawImage(keyImg, canvas.width/2 + 29, 209, 40, 40)
+    ctx.font = '22px arial';
+    ctx.shadowBlur=0;
+    ctx.lineWidth=0;
+    ctx.fillStyle = 'black';
+    ctx.fillText(`A`, canvas.width/2 + 42, 234);
+    ctx.drawImage(keyImg, canvas.width/2 - 164, 268, 40, 40)
     ctx.font = '22px arial';
     ctx.fillStyle = 'black';
-    ctx.fillText(`A`, canvas.width/2 + 51, 282);
+    ctx.fillText(`S`, canvas.width/2 - 151, 294);
     ctx.drawImage(buttonImg, canvas.width/2 - 120, 348, 240, 130)
     ctx.font = '39px "Kaushan Script"';
+    ctx.shadowColor="black";
+    ctx.shadowBlur=10;
+    ctx.lineWidth=1;
+    ctx.strokeText(`Start`, canvas.width/2 - 50, 420);
     ctx.fillStyle = '#F0F0F0';
     ctx.fillText(`Start`, canvas.width/2 - 50, 420);
+    SISPUELLA.play();
 }
 
 //INTRO GAME
 function intro(){
+    SISPUELLA.pause();
+    SISPUELLA.currentTime = 0;
+    WALPURGISTHEME.play();
     ctx.drawImage(carnivalImg, 0, 0, canvas.width, canvas.height)
     setTimeout(function(){ ctx.drawImage(fiveImg, 0, 0, canvas.width, canvas.height) }, 1000);
     setTimeout(function(){ ctx.drawImage(fourImg, 0, 0, canvas.width, canvas.height) }, 2000);
@@ -487,6 +595,8 @@ function intro(){
     setTimeout(function(){ ctx.drawImage(oneImg, 0, 0, canvas.width, canvas.height) }, 5000);
     setTimeout(function(){ ctx.drawImage(zeroImg, 0, 0, canvas.width, canvas.height) }, 6000);
     setTimeout(function(){ 
+        ctx.shadowBlur=0;
+        ctx.lineWidth=0;
         state.current = state.game
         resetGame()
         updateGameArea()
@@ -515,6 +625,7 @@ document.addEventListener('keydown', (e) => {
             if(barMagic.magicActive == false && barMagic.life >= 100){
                 barMagic.magicActive = true
                 openShield.shieldMoving = true
+                SHIELDSOUND.play()
             }
         break;
     }
@@ -553,7 +664,6 @@ document.addEventListener("click", function(evt){ // CLICK EVENT BY STATE
             if(clickX >= btnWelcome.x && clickX <= btnWelcome.x + btnWelcome.w && clickY >= btnWelcome.y && clickY <= btnWelcome.y + btnWelcome.h){
                 state.current = state.gameplay;
                 gameplay()
-                console.log('button clicked')
             }
         break;
         case state.gameplay: // CHECK IF BUTTON WAS CLICKED
@@ -561,7 +671,6 @@ document.addEventListener("click", function(evt){ // CLICK EVENT BY STATE
             if(clickX >= btnWelcome.x && clickX <= btnWelcome.x + btnWelcome.w && clickY >= btnWelcome.y && clickY <= btnWelcome.y + btnWelcome.h){
                 state.current = state.intro;
                 intro()
-                console.log('button clicked')
             }
         break;
         case state.overWin: // CHECK IF BUTTON WAS CLICKED
@@ -569,7 +678,6 @@ document.addEventListener("click", function(evt){ // CLICK EVENT BY STATE
             if(clickX >= btnWin.x && clickX <= btnWin.x + btnWin.w && clickY >= btnWin.y && clickY <= btnWin.y + btnWin.h){
                 state.current = state.welcome;
                 welcome()
-                console.log('button clicked')
             }
         break;
         case state.overLose: // CHECK IF BUTTON WAS CLICKED
@@ -577,7 +685,6 @@ document.addEventListener("click", function(evt){ // CLICK EVENT BY STATE
             if(clickX >= btnLose.x && clickX <= btnLose.x + btnLose.w && clickY >= btnLose.y && clickY <= btnLose.y + btnLose.h){
                 state.current = state.welcome;
                 welcome()
-                console.log('button clicked')
             }
         break;
     }
