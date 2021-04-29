@@ -15,6 +15,8 @@ canvas{
     border: 1px solid purple;
 }
 
+
 #random{
-    visibility: hidden;
+    color:black;
+    font-size: 1px;
 }
