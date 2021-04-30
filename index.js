@@ -46,9 +46,11 @@ bgmagentaImg.src = "./images/backgroundmagenta.png"
 const SISPUELLA = new Audio();
 SISPUELLA.src = "./audio/sis-puella-magica.mp3";
 SISPUELLA.volume = 0.1
+SISPUELLA.loop = true
 const WALPURGISTHEME = new Audio();
 WALPURGISTHEME.src = "./audio/walpurgis-night-theme.mp3";
 WALPURGISTHEME.volume = 0.1
+WALPURGISTHEME.loop = true
 const SHOOTSOUND= new Audio();
 SHOOTSOUND.src = "./audio/shoot.flac";
 SHOOTSOUND.volume = 0.1
@@ -631,13 +633,13 @@ document.addEventListener('keydown', (e) => {
             }
         break;
         case 79: // letter O
-            barHomura.life = 5
+            //barHomura.life = 5
         break;
         case 80: // letter P
-            barWalpurgis.life = 4
+            //barWalpurgis.life = 4
         break;
         case 73: // letter I
-            barMagic.life = 100
+            //barMagic.life = 100
         break;
     }
   })
